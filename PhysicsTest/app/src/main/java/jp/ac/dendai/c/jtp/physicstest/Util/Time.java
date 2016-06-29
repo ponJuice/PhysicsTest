@@ -5,11 +5,13 @@ package jp.ac.dendai.c.jtp.physicstest.Util;
  */
 public class Time {
     private static long startTimeMillis,endTimeMillis,freezeBuffer;
+    private static long totalTimeMillis;
     private static boolean isFreeze;
     static {
         startTimeMillis = 0;
         endTimeMillis = 0;
         freezeBuffer = 0;
+        totalTimeMillis = 0;
         isFreeze = false;
     }
     //時間を区切る
@@ -18,6 +20,7 @@ public class Time {
             return;
         startTimeMillis = endTimeMillis;
         endTimeMillis = System.currentTimeMillis();
+        totalTimeMillis += getDelta();
     }
     //時間カウントを一時停止
     public static void freeze(){
@@ -39,5 +42,9 @@ public class Time {
         if(isFreeze)
             return freezeBuffer;
         return endTimeMillis - startTimeMillis;
+    }
+
+    public static long getTotalTimeMillis(){
+        return totalTimeMillis;
     }
 }

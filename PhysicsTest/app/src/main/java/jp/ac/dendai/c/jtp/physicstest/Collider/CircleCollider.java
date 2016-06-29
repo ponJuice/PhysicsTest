@@ -16,9 +16,23 @@ public class CircleCollider extends Collider{
         this.object = object;
         this.radius = radius;
     }
+
+    @Override
+    public float getDeepMagnitude(ICollider col){
+        //二つのオブジェクトの距離ベクトルを計算
+        Constant.buffer2D.zeroReset();
+        Constant.buffer2D.copy(object.getPosition());
+        Constant.buffer2D.sub(col.getPhysicsObject().getPosition());
+        //それぞれのオブジェクトの半径の合計を計算
+        float sumRadius = radius + col.getBoundaryCircle();
+
+        return sumRadius - Constant.buffer2D.getMagnitude();
+    }
+
     @Override
     public boolean isCollision(ICollider col) {
         //二つのオブジェクトの距離ベクトルを計算
+        Constant.buffer2D.zeroReset();
         Constant.buffer2D.copy(object.getPosition());
         Constant.buffer2D.sub(col.getPhysicsObject().getPosition());
         //それぞれのオブジェクトの半径の合計を計算

@@ -16,6 +16,8 @@ import jp.ac.dendai.c.jtp.physicstest.Math.Vector2;
 public class Physics2D implements IPhysics2D{
     private float mass;            //質量
     private Vector2 velocity;      //速度
+    private Vector2 velocityBuffer; //更新前速度
+    private Vector2 impulseVelocity;    //撃力
     private Vector2 position;       //位置
     private float e;                //跳ね返り係数
     private ICollider collider;     //衝突判定用
@@ -23,6 +25,8 @@ public class Physics2D implements IPhysics2D{
     public Physics2D(Physics2DTemplate p2t,ICollider collider){
         mass = p2t.mass;
         velocity = new Vector2(p2t.velocity);
+        velocityBuffer = new Vector2(velocity);
+        impulseVelocity = new Vector2();
         position = new Vector2(p2t.position);
         e = p2t.e;
         this.collider = collider;
@@ -37,6 +41,11 @@ public class Physics2D implements IPhysics2D{
     }
 
     @Override
+    public void addVelocityImpulse(Vector2 vector){
+        impulseVelocity.add(vector);
+    }
+
+    @Override
     public void setPosition(Vector2 position) {
         this.position.copy(position);
     }
@@ -48,12 +57,13 @@ public class Physics2D implements IPhysics2D{
 
     @Override
     public void addVelocity(Vector2 velocity) {
-        this.velocity.add(velocity);
+        this.velocityBuffer.add(velocity);
     }
 
     @Override
     public void setVelocity(Vector2 velocity) {
         this.velocity.copy(velocity);
+        velocityBuffer.copy(velocity);
     }
 
     @Override
@@ -83,8 +93,14 @@ public class Physics2D implements IPhysics2D{
 
     @Override
     public void updatePosition(float deltaTime){
-        position.setX(position.getX() + velocity.getX() * deltaTime);
-        position.setY(position.getY() + velocity.getY() * deltaTime);
+        position.setX(position.getX() + velocityBuffer.getX() * deltaTime);
+        position.setY(position.getY() + velocityBuffer.getY() * deltaTime);
+        velocity.copy(velocityBuffer);
+
+        //撃力
+        position.setX(position.getX() + impulseVelocity.getX());
+        position.setY(position.getY() + impulseVelocity.getY());
+        impulseVelocity.zeroReset();
     }
 
     @Override

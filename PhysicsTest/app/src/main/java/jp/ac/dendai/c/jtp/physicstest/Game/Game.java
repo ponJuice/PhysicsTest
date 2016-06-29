@@ -29,33 +29,44 @@ public class Game{
         //物理世界の設定
         PhysicsWorldTemplate pwt = new PhysicsWorldTemplate();
         pwt.gravityX = 0;
-        pwt.gravityY = -9.8f;
+        pwt.gravityY = -0.098f;
         pwt.gravityZ = 0;
         pwt.maxObject = 100;
-        pwt.timeStepMilliTime = PhysicsWorldTemplate.frameNumToTimeStep(30);
+        pwt.timeStepMilliTime = PhysicsWorldTemplate.frameNumToTimeStep(60);
+        p2w = new Physics2DWorld(pwt,lockObject);
 
         //物理オブジェクトの設定
-        p2w = new Physics2DWorld(pwt,lockObject);
         Physics2DTemplate p2t = new Physics2DTemplate();
         p2t.position.setX(width / 2f);
         p2t.position.setY(height);
-        p2t.mass = 100;
+        p2t.mass = 1;
         p2t.e = 1f;
-
         Physics2D p = new Physics2D(p2t,null);
-        ICollider c = new CircleCollider(p,100);
+        ICollider c = new CircleCollider(p,50);
         p.setCollider(c);
 
         //物理オブジェクトの追加
         p2w.addPhysicsObject(p);
 
-    }
+        p2t.position.setX(width/2f);
+        p2t.position.setY(0);
+        p2t.mass = 10;
+        p2t.e = 1f;
+        p = new Physics2D(p2t,null);
+        c = new CircleCollider(p,50);
+        p.setCollider(c);
+        //上向きの力を与える(初速度)
+        Constant.buffer2D.zeroReset();
+        Constant.buffer2D.setX(0);
+        Constant.buffer2D.setY(0.5f);
+        p.setVelocity(Constant.buffer2D);
 
-    public void simulateStart(){
-        //物理演算スタート
-        p2w.startWorld();
+        //物理オブジェクトの追加
+        p2w.addPhysicsObject(p);
     }
-
+    public void startSimulate(){
+        p2w.startPipeline();
+    }
     public Physics2DWorld getPhysics2DWorld(){
         return p2w;
     }

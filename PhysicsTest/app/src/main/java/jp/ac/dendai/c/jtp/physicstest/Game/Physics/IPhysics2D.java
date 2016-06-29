@@ -14,6 +14,8 @@ import jp.ac.dendai.c.jtp.physicstest.Math.Vector2;
 public interface IPhysics2D {
     //力を加える(撃力)
     public void addForceImpulse(Vector2 newton);
+    //力を加える(撃力)
+    public void addVelocityImpulse(Vector2 velocity);
     //位置を変える
     public void setPosition(Vector2 position);
     //位置を取得する
