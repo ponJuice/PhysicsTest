@@ -1,6 +1,5 @@
 package jp.ac.dendai.c.jtp.physicstest.Game.Physics;
 
-import jp.ac.dendai.c.jtp.physicstest.Collider.ICollider;
 import jp.ac.dendai.c.jtp.physicstest.Math.Vector2;
 
 /**

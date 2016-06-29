@@ -1,4 +1,4 @@
-package jp.ac.dendai.c.jtp.physicstest.Collider;
+package jp.ac.dendai.c.jtp.physicstest.Game.Collider;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;

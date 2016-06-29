@@ -3,9 +3,7 @@ package jp.ac.dendai.c.jtp.physicstest.Game.Physics;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
-import java.util.LinkedList;
-
-import jp.ac.dendai.c.jtp.physicstest.Collider.ICollider;
+import jp.ac.dendai.c.jtp.physicstest.Game.Collider.ICollider;
 import jp.ac.dendai.c.jtp.physicstest.Math.Vector2;
 
 /**

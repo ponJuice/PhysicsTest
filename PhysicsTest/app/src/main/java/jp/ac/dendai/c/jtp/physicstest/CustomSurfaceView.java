@@ -8,13 +8,9 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import java.util.Objects;
-import java.util.concurrent.ThreadLocalRandom;
-
-import jp.ac.dendai.c.jtp.physicstest.Collider.ICollider;
+import jp.ac.dendai.c.jtp.physicstest.Game.Collider.ICollider;
 import jp.ac.dendai.c.jtp.physicstest.Game.Game;
 import jp.ac.dendai.c.jtp.physicstest.Game.Physics.IPhysics2D;
-import jp.ac.dendai.c.jtp.physicstest.Game.Physics.Physics2DWorld;
 import jp.ac.dendai.c.jtp.physicstest.Util.Time;
 
 /**
@@ -29,6 +25,7 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
     private final Object lock;
     private Context context;
     private Game game;
+    private Debugger debug;
 
     private float width,height;
 
@@ -42,7 +39,7 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
         paint = new Paint();
         //色を黒に設定
-        paint.setColor(Color.argb(255,0,0,0));
+        paint.setColor(Color.argb(255, 0, 0, 0));
         //アンチエイリアスなし
         paint.setAntiAlias(false);
         //塗りつぶしなし（枠線表示）
@@ -50,6 +47,9 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         paint.setStrokeWidth(5);
         //文字サイズ指定
         paint.setTextSize(48);
+
+        //デバッガ作成
+        debug = new Debugger();
     }
 
     @Override
@@ -63,6 +63,15 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         this.height = height;
         //ゲームの初期化
         game = new Game(context,width,height,lock);
+
+        //デバッガにオブジェクトを登録
+        for(IPhysics2D p : game.getPhysics2DWorld().getPhysicsObjects()) {
+            debug.addTarget(p);
+        }
+        //デバッガの設定
+        debug.trajectory = true;
+        debug.trajectoryRage = 10;
+
         //描画用スレッド作成＆開始
         thread = new Thread(new DrawThread());
         thread.start();
@@ -84,24 +93,30 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
     class DrawThread extends Thread{
         @Override
         public void run() {
+            //スレッド終了判定
             while(isAttached){
                 synchronized (lock) {
                     Canvas canvas = holder.lockCanvas();
                     if(canvas==null)
                         continue;
+                    //背景色初期化
                     canvas.drawColor(Color.argb(255, 255, 255, 255));
+                    //オブジェクトの軌跡の描画
+                    debug.drawTrajectory(canvas,width,height);
+                    //すべての物理世界のオブジェクトを描画
                     for(IPhysics2D p : game.getPhysics2DWorld().getPhysicsObjects()) {
                         ICollider c = p.getCollider();
-                        //Log.d("CustomSurfaceView", "("+p.getPosition().getX()+","+p.getPosition().getY()+") radius "+c.getBoundaryCircle());
-                        canvas.drawCircle(p.getPosition().getX(),p.getPosition().getY(),p.getCollider().getBoundaryCircle(),paint);
-                        canvas.drawText(p.getVelocity().toString(),p.getPosition().getX(),p.getPosition().getY(),paint);
+                        //オブジェクトの描画
+                        canvas.drawCircle(width - p.getPosition().getX(),height - p.getPosition().getY(),p.getCollider().getBoundaryCircle(),paint);
+                        //オブジェクトの速度、質量を表示
+                        canvas.drawText(p.getVelocity().toString() + " mass:"+p.getMass(),width - p.getPosition().getX(),height - p.getPosition().getY(),paint);
                     }
-                    canvas.drawCircle(0,0,100,paint);
                     holder.unlockCanvasAndPost(canvas);
                 }
 
                 try {
-                    Thread.sleep(30);
+                    //適当な時間スリープ
+                    Thread.sleep(10);
                 } catch (InterruptedException e) {
                     break;
                 }
@@ -115,10 +130,10 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
             while(isAttached){
                 if(Time.isFreeze())
                     continue;
+                //時間を区切る
                 Time.punctuate();
                 //スリープ時間の算出
                 long time = game.getPhysics2DWorld().getTimeStep() - Time.getDelta();
-                Log.d("SimulateThread", "DeltaTime : " + Time.getDelta() + " time :"+time);
                 //時間が余っていたらスリープ
                 if(time > 0) {
                     try {
@@ -127,13 +142,6 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
                         break;
                     }
                 }
-                /*if(Time.getTotalTimeMillis() >= 1000){
-                    Time.punctuate();
-                    game.getPhysics2DWorld().freeze();
-                    Log.d("updatePosition", "velocity is "
-                            + game.getPhysics2DWorld().getPhysicsObjects().get(0).getVelocity().toString()
-                            + " time:"+Time.getTotalTimeMillis());
-                }*/
                 //パイプライン処理
                 game.startSimulate();
             }

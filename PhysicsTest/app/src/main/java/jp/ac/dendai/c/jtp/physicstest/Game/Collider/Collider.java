@@ -1,4 +1,4 @@
-package jp.ac.dendai.c.jtp.physicstest.Collider;
+package jp.ac.dendai.c.jtp.physicstest.Game.Collider;
 
 import jp.ac.dendai.c.jtp.physicstest.Game.Physics.IPhysics2D;
 

@@ -1,10 +1,9 @@
-package jp.ac.dendai.c.jtp.physicstest.Collider;
+package jp.ac.dendai.c.jtp.physicstest.Game.Collider;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
 import jp.ac.dendai.c.jtp.physicstest.Game.Constant;
-import jp.ac.dendai.c.jtp.physicstest.Game.Physics.IPhysics2D;
 import jp.ac.dendai.c.jtp.physicstest.Game.Physics.Physics2D;
 
 /**
