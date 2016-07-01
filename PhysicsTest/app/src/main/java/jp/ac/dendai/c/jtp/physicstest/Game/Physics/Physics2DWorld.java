@@ -23,8 +23,10 @@ public class Physics2DWorld{
     private int maxObject;
     private long timeStep;
 
+    private String[] info;
+
     public Physics2DWorld(PhysicsWorldTemplate pwt,Object lock){
-        this.gravity = new Vector2(pwt.gravityX/1000f,pwt.gravityY/1000f);
+        this.gravity = new Vector2(pwt.gravityX,pwt.gravityY);
         this.maxObject = pwt.maxObject;
         this.timeStep = pwt.timeStepMilliTime;
         this.lock = lock;
@@ -177,4 +179,24 @@ public class Physics2DWorld{
             //Log.d("updatePosition", "velocity is " + p.getVelocity().toString() + " time:"+Time.getTotalTimeMillis());
         }
     }
+
+    public String getWorldInfo(){
+        return "--- World Info ---"
+                +"gravity  : " + gravity.toString() + "[m/s]\n"
+                +"Object   : " + physics.size() + "/" + maxObject + "[objects]\n"
+                +"timeStep : " + timeStep +"[milli sec]\n"
+                +"Sinking  : " + k + "\n";
+    }
+
+    public String[] getWorldInfoArray(){
+        if(info == null)
+            info = new String[4];
+        info[0] = "gravity  : " + gravity.toString() + "[m/s]";
+        info[1] = "Object   : " + physics.size() + "/" + maxObject + "[objects]";
+        info[2] = "timeStep : " + timeStep +"[milli sec]";
+        info[3] = "Sinking  : " + k;
+
+        return info;
+    }
+
 }

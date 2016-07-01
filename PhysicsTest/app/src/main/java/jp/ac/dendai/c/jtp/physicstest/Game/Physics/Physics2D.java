@@ -13,7 +13,7 @@ import jp.ac.dendai.c.jtp.physicstest.Math.Vector2;
 public class Physics2D implements IPhysics2D{
     private float mass;            //質量
     private Vector2 velocity;      //速度
-    private Vector2 velocityBuffer; //更新前速度
+    private Vector2 velocityUpdate;
     private Vector2 impulseVelocity;    //撃力
     private Vector2 position;       //位置
     private float e;                //跳ね返り係数
@@ -22,7 +22,7 @@ public class Physics2D implements IPhysics2D{
     public Physics2D(Physics2DTemplate p2t,ICollider collider){
         mass = p2t.mass;
         velocity = new Vector2(p2t.velocity);
-        velocityBuffer = new Vector2(velocity);
+        velocityUpdate = new Vector2();
         impulseVelocity = new Vector2();
         position = new Vector2(p2t.position);
         e = p2t.e;
@@ -54,13 +54,13 @@ public class Physics2D implements IPhysics2D{
 
     @Override
     public void addVelocity(Vector2 velocity) {
-        this.velocityBuffer.add(velocity);
+        this.velocityUpdate.setX(this.velocityUpdate.getX() + this.velocity.getX() + velocity.getX());
+        this.velocityUpdate.setY(this.velocityUpdate.getY() + this.velocity.getY() + velocity.getY());
     }
 
     @Override
     public void setVelocity(Vector2 velocity) {
-        this.velocity.copy(velocity);
-        velocityBuffer.copy(velocity);
+        velocityUpdate.add(velocity);
     }
 
     @Override
@@ -89,10 +89,11 @@ public class Physics2D implements IPhysics2D{
     }
 
     @Override
-    public void updatePosition(float deltaTime){
-        position.setX(position.getX() + velocityBuffer.getX() * deltaTime);
-        position.setY(position.getY() + velocityBuffer.getY() * deltaTime);
-        velocity.copy(velocityBuffer);
+    public void updatePosition(float deltaTimeSec){
+        position.setX(position.getX() + velocityUpdate.getX() * deltaTimeSec);
+        position.setY(position.getY() + velocityUpdate.getY() * deltaTimeSec);
+        velocity.copy(velocityUpdate);
+        velocityUpdate.zeroReset();
 
         //撃力
         position.setX(position.getX() + impulseVelocity.getX());

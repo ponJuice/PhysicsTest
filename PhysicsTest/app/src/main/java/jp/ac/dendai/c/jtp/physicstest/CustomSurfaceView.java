@@ -61,6 +61,7 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         this.width = width;
         this.height = height;
+        Log.d("Screen Size","width : "+width +" height : "+height);
         //ゲームの初期化
         game = new Game(context,width,height,lock);
 
@@ -71,6 +72,9 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         //デバッガの設定
         debug.trajectory = true;
         debug.trajectoryRage = 10;
+        debug.timeInfo = true;
+        debug.worldInfo = false;
+        debug.screenInfo = true;
 
         //描画用スレッド作成＆開始
         thread = new Thread(new DrawThread());
@@ -78,6 +82,7 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         //シミュレート用スレッド作成＆開始
         moveThread = new Thread(new SimulateThread());
         moveThread.start();
+        Time.resetTotalStartTime();
         Log.d("surfaceChanged", "changed");
         setFocusable(true);
         requestFocus();
@@ -95,6 +100,7 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         public void run() {
             //スレッド終了判定
             while(isAttached){
+                debug.FPSCount();
                 synchronized (lock) {
                     Canvas canvas = holder.lockCanvas();
                     if(canvas==null)
@@ -102,14 +108,20 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
                     //背景色初期化
                     canvas.drawColor(Color.argb(255, 255, 255, 255));
                     //オブジェクトの軌跡の描画
-                    debug.drawTrajectory(canvas,width,height);
+                    debug.drawTrajectory(canvas, width, height, 1f);
+                    //時間の表示
+                    debug.drawTimeInfo(canvas, 0, 50);
+                    //画面情報表示
+                    debug.drawScreenInfo(canvas, 0, 100, width,height,1);
+                    //物理世界の情報表示
+                    debug.drawWorldInfo(canvas,game.getPhysics2DWorld(),0,250);
                     //すべての物理世界のオブジェクトを描画
                     for(IPhysics2D p : game.getPhysics2DWorld().getPhysicsObjects()) {
                         ICollider c = p.getCollider();
                         //オブジェクトの描画
-                        canvas.drawCircle(width - p.getPosition().getX(),height - p.getPosition().getY(),p.getCollider().getBoundaryCircle(),paint);
-                        //オブジェクトの速度、質量を表示
-                        canvas.drawText(p.getVelocity().toString() + " mass:"+p.getMass(),width - p.getPosition().getX(),height - p.getPosition().getY(),paint);
+                        canvas.drawCircle(width - p.getPosition().getX()/1f,height - p.getPosition().getY()/1f,p.getCollider().getBoundaryCircle()/1f,paint);
+                        //オブジェクトの位置、速度、質量を表示
+                        canvas.drawText(p.getPosition().toString() + p.getVelocity().toString() + " mass:"+p.getMass(),width - p.getPosition().getX()/1f,height - p.getPosition().getY()/1f,paint);
                     }
                     holder.unlockCanvasAndPost(canvas);
                 }
@@ -133,7 +145,7 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
                 //時間を区切る
                 Time.punctuate();
                 //スリープ時間の算出
-                long time = game.getPhysics2DWorld().getTimeStep() - Time.getDelta();
+                long time = game.getPhysics2DWorld().getTimeStep() - Time.getDeltaMillis();
                 //時間が余っていたらスリープ
                 if(time > 0) {
                     try {
